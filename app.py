@@ -213,11 +213,49 @@ def render_disclaimer() -> None:
     )
 
 
+def render_automation(result: dict) -> None:
+    workflow = result.get("automation") or {}
+    case = workflow.get("case") or {}
+    if not case:
+        return
+
+    with st.expander("⚙️ Automated Case Workflow", expanded=False):
+        status = case.get("status", "unknown").replace("_", " ").title()
+        st.markdown(
+            f"**Case:** `{case.get('case_id', 'n/a')}`  
+"
+            f"**Status:** {status} · **Risk:** {case.get('risk_level', 'unknown').title()} · "
+            f"**Category:** {case.get('category', 'other').replace('_', ' ').title()}"
+        )
+
+        tasks = workflow.get("tasks") or []
+        if tasks:
+            st.markdown("**Automated tasks**")
+            for task in tasks:
+                priority = str(task.get("priority", "normal")).title()
+                st.markdown(f"- **{priority}:** {task.get('title', 'Review case')}")
+
+        escalations = workflow.get("escalations") or []
+        if escalations:
+            st.warning(
+                "Human review escalation created: "
+                + str(escalations[0].get("reason", "Review required."))
+            )
+        else:
+            st.caption("No escalation rule was triggered.")
+
+        audit = workflow.get("audit") or []
+        if audit:
+            st.caption(f"Audit events recorded: {len(audit)}")
+
+
 def render_evidence(result: dict, scan: dict | None) -> None:
     """Scan details + pipeline + evidence expanders for one investigation."""
 
     if scan and scan.get("level") != "none":
         scan_details(scan)
+
+    render_automation(result)
 
     with st.expander("🧠 Investigation Pipeline", expanded=False):
         render_pipeline(result.get("events", []))
