@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from automation import AutomationEngine
+
 class InvestigationOrchestrator:
     def __init__(self, router, retriever, web_search, settings):
         self.router = router
@@ -26,6 +28,7 @@ class InvestigationOrchestrator:
         self.critic = CriticAgent(router)
         self.judge = JudgeAgent(router)
         self.response = ResponseAgent(router)
+        self.automation = AutomationEngine()
 
     def detect_intent(self, user_text: str) -> dict:
         """Route ordinary conversation away from the scam investigation pipeline."""
@@ -50,7 +53,7 @@ class InvestigationOrchestrator:
             mode=mode, style=style, language=language, signals=signals
         )
         events.append("Response Agent — Fast response generated")
-        return {
+        result = {
             "answer": final,
             "events": events,
             "classification": classification,
@@ -58,6 +61,9 @@ class InvestigationOrchestrator:
             "web": web,
             "analysis": analysis,
         }
+        result["automation"] = self.automation.process(result, mode=mode)
+        events.append("BPA Automation Engine — Case workflow completed")
+        return result
 
     def run(self, user_text: str, mode="Deep Investigation", style="Balanced", language="English", signals="") -> dict:
         events = []
@@ -95,7 +101,7 @@ class InvestigationOrchestrator:
             evidence["evidence"],
             mode=mode, style=style, language=language, signals=signals
         )
-        return {
+        result = {
             "answer": final,
             "events": events,
             "classification": classification,
@@ -107,3 +113,6 @@ class InvestigationOrchestrator:
             "judge": judge,
             "critique": critique,
         }
+        result["automation"] = self.automation.process(result, mode=mode)
+        events.append("BPA Automation Engine — Case workflow completed")
+        return result
