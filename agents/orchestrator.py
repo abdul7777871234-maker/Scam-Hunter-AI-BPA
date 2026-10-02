@@ -44,10 +44,16 @@ class InvestigationOrchestrator:
         # This avoids a slow external lookup on every fast scan; Deep Investigation
         # remains the mode for current external/domain-level research.
         web = {"items": [], "cached": False}
-        evidence = self.evidence.run(user_text, rag, web)
-        events.append("Evidence Agent — Evidence analyzed")
-        analysis = evidence.get("analysis", "")
-        evidence_items = evidence.get("evidence", rag.get("evidence", []))
+        # Quick Check uses retrieved evidence directly and lets the final response
+        # agent synthesize the assessment. Full Evidence Agent analysis remains in
+        # Deep Investigation to keep Quick Check latency low.
+        evidence_items = rag.get("evidence", [])
+        analysis = (
+            "Quick Check evidence context was retrieved from the knowledge base. "
+            "Use the cited evidence below to assess the supplied content and clearly "
+            "separate observed facts from uncertain claims."
+        )
+        events.append("Evidence Agent — Evidence context prepared")
         final = self.response.run(
             user_text, analysis, "", "", evidence_items,
             mode=mode, style=style, language=language, signals=signals
