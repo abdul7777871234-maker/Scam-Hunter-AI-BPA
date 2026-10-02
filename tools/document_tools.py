@@ -59,6 +59,7 @@ def validate_upload(
     path: Union[str, Path],
     max_mb: int = 10,
     size_bytes: int | None = None,
+    data: bytes | None = None,
 ) -> str:
     """
     Validate an uploaded file.
