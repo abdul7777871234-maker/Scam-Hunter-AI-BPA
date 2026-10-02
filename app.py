@@ -222,8 +222,7 @@ def render_automation(result: dict) -> None:
     with st.expander("⚙️ Automated Case Workflow", expanded=False):
         status = case.get("status", "unknown").replace("_", " ").title()
         st.markdown(
-            f"**Case:** `{case.get('case_id', 'n/a')}`  
-"
+            f"**Case:** `{case.get('case_id', 'n/a')}`  \n"
             f"**Status:** {status} · **Risk:** {case.get('risk_level', 'unknown').title()} · "
             f"**Category:** {case.get('category', 'other').replace('_', ' ').title()}"
         )
