@@ -63,7 +63,18 @@ class GeminiProvider:
 
         errors: list[str] = []
 
-        for index, model in enumerate(self.models):
+        # Image analysis is latency-sensitive. Prefer lightweight multimodal
+        # models first and keep the fallback chain bounded.
+        image_models = []
+        for preferred in ("gemini-flash-lite-latest", "gemini-flash-latest"):
+            if preferred in self.models and preferred not in image_models:
+                image_models.append(preferred)
+        for model in self.models:
+            if model not in image_models:
+                image_models.append(model)
+        image_models = image_models[:4]
+
+        for index, model in enumerate(image_models):
             try:
                 response = self.client.models.generate_content(
                     model=model,
