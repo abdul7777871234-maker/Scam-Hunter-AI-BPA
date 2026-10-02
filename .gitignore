@@ -1,0 +1,11 @@
+.streamlit/secrets.toml
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+venv/
+.venv/
+memory_data/
+cache/search_cache.json
+temp_uploads/
