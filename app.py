@@ -395,7 +395,7 @@ USER:
     return result.text.strip()
 
 
-def run_investigation(text: str, signals: str = "") -> dict:
+def run_investigation(text: str, signals: str = "", classification: dict | None = None) -> dict:
     """
     Quick Check:
         FAISS/RAG -> Evidence Agent -> Response Agent
@@ -422,6 +422,7 @@ def run_investigation(text: str, signals: str = "") -> dict:
         "style": style,
         "language": language,
         "signals": signals,
+        "classification": classification,
     }
     kwargs = {key: value for key, value in options.items() if key in params}
 
@@ -736,6 +737,7 @@ if submission:
                                 result = run_investigation(
                                     analysis_input,
                                     signals=format_signals(scan),
+                                    classification=intent,
                                 )
 
                                 raw_answer = result.get(

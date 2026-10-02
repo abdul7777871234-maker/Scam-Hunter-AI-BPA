@@ -34,16 +34,16 @@ class InvestigationOrchestrator:
         """Route ordinary conversation away from the scam investigation pipeline."""
         return self.classifier.run(user_text)
 
-    def run_quick(self, user_text: str, mode="Quick Check", style="Balanced", language="English", signals="") -> dict:
+    def run_quick(self, user_text: str, mode="Quick Check", style="Balanced", language="English", signals="", classification=None) -> dict:
         events = []
-        classification = self.classifier.run(user_text)
+        classification = classification or self.classifier.run(user_text)
         events.append("Classifier Agent — Input classified")
         rag = self.rag.run(user_text)
         events.append("RAG Agent — Knowledge base searched")
+        # Quick Check intentionally keeps web research off by default.
+        # This avoids a slow external lookup on every fast scan; Deep Investigation
+        # remains the mode for current external/domain-level research.
         web = {"items": [], "cached": False}
-        if classification.get("requires_web", False):
-            web = self.web.run(user_text[:2500])
-            events.append("Web Research Agent — Web research completed")
         evidence = self.evidence.run(user_text, rag, web)
         events.append("Evidence Agent — Evidence analyzed")
         analysis = evidence.get("analysis", "")
@@ -65,9 +65,9 @@ class InvestigationOrchestrator:
         events.append("BPA Automation Engine — Case workflow completed")
         return result
 
-    def run(self, user_text: str, mode="Deep Investigation", style="Balanced", language="English", signals="") -> dict:
+    def run(self, user_text: str, mode="Deep Investigation", style="Balanced", language="English", signals="", classification=None) -> dict:
         events = []
-        classification = self.classifier.run(user_text)
+        classification = classification or self.classifier.run(user_text)
         events.append("Classifier Agent — Input classified")
         rag = self.rag.run(user_text) if classification.get("requires_rag", True) else {"items": [], "evidence": []}
         events.append("RAG Agent — Knowledge base searched")
