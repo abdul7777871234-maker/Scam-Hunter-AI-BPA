@@ -146,7 +146,19 @@ class GeminiProvider:
 
         errors: list[str] = []
 
-        for index, model in enumerate(self.models):
+        # Screenshot/OCR is latency-sensitive. Try the fastest configured
+        # multimodal model first, then only one fallback. This prevents a
+        # long chain of quota/availability waits from making attachment
+        # reading take minutes.
+        image_models = []
+        for preferred in ("gemini-flash-lite-latest", "gemini-flash-latest"):
+            if preferred in self.models:
+                image_models.append(preferred)
+        if not image_models and self.models:
+            image_models.append(self.models[0])
+        image_models = image_models[:2]
+
+        for index, model in enumerate(image_models):
             try:
                 image_part = types.Part.from_bytes(
                     data=image_bytes,
